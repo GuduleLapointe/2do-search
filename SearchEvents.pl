@@ -2,10 +2,11 @@
 
 	use strict;
 	use warnings;
-	
-	use lib 'lib';
-	
+
+	use File::Basename;
+	use lib dirname (__FILE__) . "/lib";
 	require "setupMYSQL.plx";
+
 	my $db = GetDB();
 
 
