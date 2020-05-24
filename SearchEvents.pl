@@ -7,53 +7,57 @@
 	use lib dirname (__FILE__) . "/lib";
 	require "setupMYSQL.plx";
 
+	use CGI;                             # load CGI routines
+	my $q = new CGI;                        # create new CGI object
+	print $q->header;
+
 	my $db = GetDB();
 
 
 	require LWP::UserAgent;
-	
+
 	my $ua = LWP::UserAgent->new;
 	$ua->timeout(10);
 	$ua->env_proxy;
 
-	## replacing defunct HYPEvents with fork 2DO.pm	
+	## replacing defunct HYPEvents with fork 2DO.pm
 	#my $response = $ua->get('http://yourworlds.eu/hypevents/events.json');
 	my $response = $ua->get('http://2do.pm/events/events.json');
-	
+
 	my $x = $response->content;
 	my %Cat;
 	if ($response->is_success) {
-	
+
 	#open (OUT, ">", "../SecondLife/events.json");
 	open (OUT, ">", "events.json");
 	my $x = $response->decoded_content;
 	$x =~ s/}/}\n/g;
 	print OUT $x;
 	close OUT;
-   
+
 	my $q = 'delete from events';
 	$db->Sql($q);
 	if ($db->Error) {
 		die $db->Error;
 	}
-	
+
 	use JSON;
-	
+
 	my @a =  decode_json $response->content;
-	
+
 	use utf8;
-	
+
 	for my $b( @a ) {
 	for my $data ( @$b ) {
-		
+
 		my $name = $data->{title};
-				
+
 		my $time = $data->{start};  #2018-08-30T07:00:00+00:00
 		my $slurl = $data->{hgurl};
-		
+
 		use HTML::Entities;
 		$slurl = encode_entities($slurl);
-		
+
 		my $description =  $data->{description};
 		$description = decode_entities($description);
 		# remove any possible non-breaking spaces that will make the script fail
@@ -61,14 +65,14 @@
 		$description =~ s/\xA0/ /g;
 		$description =~ s/&amp;nbsp;/ /g;
 		$description =~ s/&nbsp;/ /g;
-		
+
 		use HTML::Strip;
-	
+
 		my $hs = HTML::Strip->new();
-	
+
 		$description = $hs->parse( $description );
 		$hs->eof;
-		 
+
 		# had to comment these out as another source of problem characters
 		#utf8::decode($description);
 
@@ -80,10 +84,10 @@
 		$name =~ s/&nbsp;/ /g;
 		# had to comment these out as another source of problem characters
 		#utf8::decode($name);
-		
+
 		print "$description\n";
-		my @categories = $data->{categories};		
-		
+		my @categories = $data->{categories};
+
 		foreach my $category (@categories)
 		{
 			foreach  my $c (@$category)
@@ -91,25 +95,25 @@
 				$Cat{$c} ++;
 			}
 		}
-		
+
 		my $end = $data->{end};
-				
+
 		use Date::Manip;
 		my $date1=&ParseDate($time);
 		print &UnixDate($date1,"The time is now %T on %b %e, %Y.\n");
 		&UnixDate($date1,"The time is now %T on %b %e, %Y.\n");
 		my $startdate = &UnixDate($date1,"%Y-%m-%d %H:%M:%S");
-		
+
 		my $h = &UnixDate($date1,"%H");
 		my $mn =&UnixDate($date1,"%M");
 		my $s =&UnixDate($date1,"%S");
-		
+
 		my $y =&UnixDate($date1,"%Y");
 		my $m =&UnixDate($date1,"%m");
 		my $dd =&UnixDate($date1,"%d");
-				
+
 		my $secs= &Date_SecsSince1970GMT($m,$dd,$y,$h,$mn,$s) - 60*60 *2;
-		
+
 		my $date2=&ParseDate($end);
 		print &UnixDate($date2,"The event ends at %T on %b %e, %Y.\n");
 		my $err;
@@ -117,32 +121,32 @@
 		print "The duration is $delta\n";
 		#0:0:0:0:24:0:0
 		my ($a,$b,$c,$d,$day,$min,$sec) = split(':',$delta);
-		
-		my $duration = $day * 60 + $min; 
+
+		my $duration = $day * 60 + $min;
 		print "The duration is $duration minutes\n";
 		# hop://goto.theencoreescape.com:8002/All Saints Ballroom/94/124/34
-		
+
 		my $gateway = '';
 		my $simname = '';
 		my $port = '';
 		my $landingpoint = '';
-			
+
 		print "$data->{hgurl}\n";
-		
+
 		use URI::Escape;
-		
+
 		# clean up front end
 		$slurl =~ s/http:\/\///;
 		$slurl =~ s/:\/\///;
 		$slurl =~ s/\/\///;
 		$slurl =~ s/(\d{4}):/$1\//;
-		
+
 		if ($slurl =~ /KARAOKE/i) {
 			my $bp = 1;
 		}
 		if ($slurl =~ /(.*):(\d+)\/(.*?)\/(.*)/ ) {
 			$gateway = $1 || '';
-			$port = $2 || '';			
+			$port = $2 || '';
 			$simname = $3 || '';
 			$simname = uri_escape_utf8($simname);
 			$landingpoint = "//$4" if $4;
@@ -166,23 +170,23 @@
 			my $bp = 1;	 # breakpoint
 			next;
 		}
-				
+
 		#secondlife://apps/teleport/goto.theencoreescape.com:8002/All Saints Ballroom/94/124/34
-		#secondlife:///app/teleport/3d.gimisa.ca|9000|gimisa3//128/128/25 
-		$slurl = qq!secondlife://app/teleport/${gateway}|${port}|${simname}${landingpoint}!;			
-		
+		#secondlife:///app/teleport/3d.gimisa.ca|9000|gimisa3//128/128/25
+		$slurl = qq!secondlife://app/teleport/${gateway}|${port}|${simname}${landingpoint}!;
+
 		$description .= "\n\n" . $slurl;
-		
+
 		print "$slurl\n\n";
-		
+
 		$name = substr($name,0,255);
-		
+
 		my $q = 'insert into events  (simname, category,creatoruuid, owneruuid,name, description,
 									  dateUTC,duration,covercharge, coveramount,parcelUUID, globalPos,
 									  eventflags) values (?,?,?,?,?,?,?,?,?,?,?,?,?) ';
 		if($db->Prepare($q))  {die $db->Error;}
 		$startdate = 0;
-		
+
 		my $uuid = '00000000-0000-0000-0000-000000000001';
 		if ($db->Execute("$slurl" ,	#simname,
 						  0,	 #category
@@ -200,12 +204,12 @@
 						  )) {die $db->Error;}
 		}
 	}
-	
+
 	foreach my $x (keys %Cat) {
 		print "$x\n";
-	}   
-	
-	
+	}
+
+
 }  else {
 	print "No events available today";
 }
@@ -224,7 +228,7 @@ insert into events  (simname,category,creatoruuid, owneruuid,name, description, 
 	1000,0,0,'00000000-0000-0000-0000-000000000000',
 	'<0,0,0>',
 	0
-	
+
 );
 
 +-------------+------------------+------+-----+---------+----------------+
