@@ -6,17 +6,25 @@ In-world Search engine for 2DO Hypegrid Events.
 
 Based on [Outworldz OpensimEvents](https://github.com/Outworldz/OpensimEvents)
 
-Installation
+Dependencies
 ------------
-* Clone this project in "search" folder, inside your web directory to make it
-available by http://example.com/search
-    * Make sure your server handles perl cgi. For apache:
+* perl
+* perl JSON
+    ```
+    sudo cpan JSON
+    ```
+* Make sure your server handles perl cgi. For apache:
     ```
     sudo apt install libapache2-mod-perl2
     sudo a2enmod perl
     ```
-    * Make sure your server accepts .htaccess rules, otherwise copy .htaccess
-      content in your website configuration
+* Make sure your server accepts .htaccess rules,
+  otherwise copy .htaccess content in your website configuration
+
+Installation
+------------
+* Clone this project in a folder named "search" inside your web directory.
+  It should be reachable at http://example.com/search
 * If needed, create ossearch database and database user
   (follow instructions in README-sql-tables.txt)
 * Create a copy of lib/MySQL.txt.example as lib/MySQL.txt and update it with
