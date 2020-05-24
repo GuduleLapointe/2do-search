@@ -12,6 +12,8 @@ Dependencies
 * perl JSON
     ```
     sudo cpan JSON
+    sudo cpan HTML::Strip
+    sudo cpan Date::Manip
     ```
 * Make sure your server handles perl cgi. For apache:
     ```
