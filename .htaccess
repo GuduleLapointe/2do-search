@@ -2,3 +2,4 @@ SetHandler perl-script
 PerlResponseHandler ModPerl::Registry
 PerlOptions +ParseHeaders
 Options +ExecCGI
+DirectoryIndex SearchEvents.pl
