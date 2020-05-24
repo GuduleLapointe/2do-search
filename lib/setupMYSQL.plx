@@ -11,18 +11,22 @@ sub GetDB()
 ##########################################
 # the ODBC name of the database and the userID and password
 
-  
+
   my $Handle;
 
-  if ( open(FILE,"/Inetpub/MySQL.txt"))
+  # use File::Basename;
+	# use lib dirname (__FILE__) . "/lib";
+
+  if ( open(FILE, dirname (__FILE__) . "/MySQL.txt"))
   {
+
     while (<FILE> )
     {
         $sms = $_;
         if ($sms =~ /^DSN/)
         {
           $Handle =new MYSQL($sms);
-          
+
           if ($Handle) # Get all setup vars from the above database - Setup Table in the database
           {
             last;
@@ -30,11 +34,11 @@ sub GetDB()
         }
     }
     close FILE;
-    
+
    }
   else
   {
-    print "NO SQL connection!";
+    print "NO SQL config!\n";
     exit;
   }
   return $Handle;
