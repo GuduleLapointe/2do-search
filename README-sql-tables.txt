@@ -7,7 +7,7 @@ mysql -u root -p<enter>
 enter your root password
 
 ' copy and paste this after modfying the use id and password
-' Add that use and password to the file lib/MYSQL.txt. 
+' Add that use and password to the file lib/MYSQL.txt.
 
 CREATE DATABASE ossearch character set = 'utf8' collate = 'utf8_general_ci';
 use ossearch;
@@ -28,8 +28,7 @@ CREATE TABLE `events` (
   `simname` varchar(255) NOT NULL,
   `parcelUUID` char(36) NOT NULL,
   `globalPos` varchar(255) NOT NULL,
-  `eventflags` int(1) NOT NULL
-  
+  `eventflags` int(1) NOT NULL,
+
   PRIMARY KEY (`eventid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
