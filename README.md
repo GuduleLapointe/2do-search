@@ -1,5 +1,7 @@
-2DO Hypergrid Events search
-===========================
+# [DEPRECATED] 2DO Hypergrid Events search
+
+This is now implemented in https://github.com/GuduleLapointe/opensim-helpers
+
 Version 0.0.17
 
 In-world Search engine for 2DO Hypegrid Events.
